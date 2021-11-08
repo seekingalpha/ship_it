@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+JENKINS_USER=jenkins
+JENKINS_PASSWORD=Wee8Shie
+JENKINS_JOB_URL=http://ci.mysite.com/job/Project%20staging%20pipeline/build
+git_commiter=$(git config --get user.email)
+commiter=${commiter:-$git_commiter}
+options="-F token=MYTOKEN"
+json="{\"parameter\": [
+       {\"name\":\"commiter\", \"value\":\"$commiter\"}"
+if [ -f new_branches.list ]; then
+  json="$json,{\"name\":\"new_branches.list\", \"file\":\"file0\"}"
+  options="$options -F file0=@new_branches.list"
+fi
+if [ -f removed_branches.list ]; then
+  json="$json,{\"name\":\"removed_branches.list\", \"file\":\"file1\"}"
+  options="$options -F file1=@removed_branches.list"
+fi
+json="$json]}"
+curl -sS $JENKINS_JOB_URL $options -F json="$json" --user $JENKINS_USER:$JENKINS_PASSWORD
+echo Shipped to CI

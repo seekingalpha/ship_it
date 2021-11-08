@@ -1,0 +1,19 @@
+#!/bin/sh
+# Jenkins online test example
+AUTH=user:password
+HOST="http://ci.mysite.com"
+URL="${HOST}/api/json?tree=quietingDown"
+SHUTTING_DOWN_STRING='{"quietingDown":true}'
+
+echo "Testing CI is online"
+status=$(curl --max-time 1 --silent --user $AUTH -XGET $URL 2>&1|grep quietingDown)
+
+if [ -z $status ] ; then
+  echo "Jenkins returned bad response, check ${HOST}"
+  exit 3
+fi
+
+if [ $SHUTTING_DOWN_STRING = "$status" ] ; then
+  echo "Jenkins is in the middle of shutting down, not shipping-it..."
+  exit 4
+fi

@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+require 'ship_it/resolve_merge'
+
+options = ResolveMerge.from_argv
+if ARGV.length == 0
+  puts "No branches specified. (try -h)"
+  exit 1
+end
+
+ResolveMerge.new(options).set_new_branches(ARGV).run

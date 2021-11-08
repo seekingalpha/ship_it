@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+require 'ship_it/rebuild_staging'
+RebuildStaging.new.run
