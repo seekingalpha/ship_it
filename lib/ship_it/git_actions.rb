@@ -10,6 +10,9 @@ class GitActions
   class Exception < ::StandardError
   end
 
+  # Bundler's special parameter for "nothing to do"
+  BUNDLER_NIL = 'BUNDLER_ENVIRONMENT_PRESERVER_INTENTIONALLY_NIL'
+
   def initialize(target = 'staging', remote = 'origin', push_remote = remote)
     @remote = (remote || 'origin').freeze
     @push_remote = (push_remote || remote).freeze
@@ -208,7 +211,9 @@ class GitActions
     if input
       options.merge!(in: input)
     end
-    env = ENV.to_h.merge('RUBYOPT' => ENV['BUNDLER_ORIG_RUBYOPT'])
+    bundler_rubyopt = ENV['BUNDLER_ORIG_RUBYOPT']
+    bundler_rubyopt = nil if bundler_rubyopt == BUNDLER_NIL
+    env = ENV.to_h.merge('RUBYOPT' => bundler_rubyopt)
     output = IO.popen(env, command_array.push(options)){|io| io.read }
     if $?.success? || forward_failure
       forward_failure ? [$?, output.strip] : output.strip
