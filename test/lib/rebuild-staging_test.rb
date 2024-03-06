@@ -499,8 +499,8 @@ class RebuildStagingTest < RepoTest
     BranchList.write("#{prefix}_branches.list", data)
   end
 
-  def rebuild(**args)
-    handler(args).run
+  def rebuild(...)
+    handler(...).run
     true
   rescue StandardError
     if /No changes made.*rebuild failed/ === $!.message || $!.message.include?('based on current master')
