@@ -146,7 +146,8 @@ class MergeHelpers
     if force
       @git.drop_branch test_name
     end
-    while !@git.rename_to(test_name)[0].success?
+    while !(result = @git.rename_to(test_name))[0].success?
+      raise result[1] if counter > 10
       counter += 1
       test_name = "#{new_name}#{counter}"
     end
