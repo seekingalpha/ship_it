@@ -82,7 +82,7 @@ class ResolveMerge < MergeHelpers
   end
 
   def resolve_broken_branches
-    broken_branches = @status.broken
+    broken_branches = @status.broken + Array.new(@bad_branches)
     broken_names = broken_branches.map(&:name)
     resolves = []
 
