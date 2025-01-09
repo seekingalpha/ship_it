@@ -69,9 +69,7 @@ class ResolveMergeTest < RepoTest
     build_staging 3
     first_branch = @branches.keys.first
     rewrite = add_branch(branch: first_branch)
-    expected_checks = @branches.values
-    expected_checks.shift # rebuilding first, merging later
-    expected_checks << rewrite
+    expected_checks = [rewrite]
     branch_debug = (@branches.values + [rewrite]).map(&:log).map(&:inspect)
     method_mock = ->(commit_id, message: nil){
       if expected_checks.empty?

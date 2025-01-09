@@ -68,6 +68,26 @@ class GitActions
     reset_branch @history_branch, "#{@remote}/#{@history_branch}"
   end
 
+  def reset_hard(to_commit_id)
+    git(['reset', '--hard', to_commit_id])
+  end
+
+  def merge_tree(lhs, rhs, commit_with_message: nil)
+    status, output = git(['merge-tree', lhs, rhs], forward_failure: true)
+    return [false, output] unless status.success?
+
+    tree_id = output
+    if commit_with_message
+      status, output = git(['commit-tree', tree_id, "-m#{commit_with_message}", '-p', lhs, '-p', rhs],
+                           forward_failure: true)
+      return [false, output] unless status.success?
+
+      commit_id = output
+      return [true, commit_id]
+    end
+    [true, tree_id]
+  end
+
   def merge(branches, message: nil)
     status, output = git(['merge', ("-m#{message}" if message), '--no-ff', *branches].compact, forward_failure: true)
     raise output if status.exitstatus == 128 # untracked files messing up the merge

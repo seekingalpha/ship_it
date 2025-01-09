@@ -161,6 +161,7 @@ class MergeHelpers
     new_branches = []
     bad_branches = []
     skipped_resolutions = []
+    merge_to_commit_id = @git.query_rev('HEAD')
     branches.each do |branch|
       parts = missing_parts?(branch, branch_names)
       if parts.any?
@@ -170,17 +171,18 @@ class MergeHelpers
         next
       end
 
-      success, output = @git.merge(branch.commit_id, message: "Merge branch '#{branch}'")
+      success, output = @git.merge_tree(merge_to_commit_id, branch.commit_id, commit_with_message: "Merge branch '#{branch}'")
       if success
+        merge_to_commit_id = output
         @logger.info "Merged #{branch} (#{branch.commit_id})"
         new_branches << branch.dup
       else
         @logger.info "Skipping #{branch} (#{branch.commit_id}) - doesn't merge cleanly"
-        @git.clear_merges
         bad_branches << branch.dup.tap {|skipped| skipped.reason = clean_reason(output)}
         branch_names -= [branch]
       end
     end
+    @git.reset_hard(merge_to_commit_id)
 
     [new_branches, bad_branches, skipped_resolutions]
   end
