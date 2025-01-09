@@ -140,6 +140,18 @@ class MergeHelpers
     @git.merge(branches.map(&:commit_id), message: "Merge #{word} #{names.join(',')}")
   end
 
+  def test_merges(branches, target, commit_id)
+    message = branches.is_a?(Array) ? 'testing merge' : nil
+    merge_to = commit_id || "#{@git.remote}/#{target}"
+    [*branches].each do |branch|
+      success, output = @git.merge_tree(merge_to, branch.commit_id, commit_with_message: message)
+      return [false, output] unless success
+
+      merge_to = output
+    end
+    [true, '']
+  end
+
   def rename_branch new_name, force: false
     counter = 0
     test_name = new_name

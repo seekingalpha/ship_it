@@ -133,7 +133,7 @@ class ResolveMerge < MergeHelpers
 
   def resolve_merge branch, commit_id, broken_branches
     @logger.info "Testing merge to #{branch}" + (commit_id ? " (#{commit_id})" : "")
-    success, output = test_merge(broken_branches, branch, commit_id)
+    success, output = test_merges(broken_branches, branch, commit_id)
     return if success && !broken_branches.any?(&:resolution?)
 
     if success
@@ -289,11 +289,11 @@ class ResolveMerge < MergeHelpers
   def check_against target, commit_id=nil, to_check=@new_branches
     @logger.info "Testing merge to #{target}" + (commit_id ? " (#{commit_id})" : "")
     status = to_check.reduce(MergeStatus.new) do |h, branch|
-      h[branch] = test_merge([branch], target, commit_id)
+      h[branch] = test_merges([branch], target, commit_id)
       h
     end
     if to_check.size > 1 && status.ok?
-      status.merged = test_merge(to_check)
+      status.merged = test_merges(to_check)
     end
     status
   end
