@@ -142,6 +142,10 @@ class GitActions
     git(['branch', '-f', track, branch, source].compact)
   end
 
+  def update_ref(ref, new_oid, old_oid=nil)
+    git(['update-ref', ref, new_oid, old_oid].compact)
+  end
+
   def checkout branch
     git(%W"checkout -q #{branch}")
   end
@@ -167,7 +171,8 @@ class GitActions
     "#{ref}/*"
   end
 
-  def query_rev_name(revision, is_remote: revision.start_with?("#{@remote}/"))
+  def query_rev_name(revision)
+    is_remote = revision.start_with?("#{@remote}/")
     _status, newrev = git(%W"name-rev --name-only --refs #{search_ref(is_remote)} --no-undefined #{revision}", forward_failure: true)
 
     if newrev.empty? || newrev.include?('cannot describe') || newrev.start_with?('Could not get sha1')

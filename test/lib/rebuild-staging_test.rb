@@ -92,7 +92,7 @@ class RebuildStagingTest < RepoTest
     @git.drop_branch('origin/predeploy_staging')
     assert rebuild
     assert_equal branch_data.map(&:log), @git.current_branch_list
-    assert @git.query_rev_name('origin/predeploy_staging', is_remote: false)
+    assert @git.query_rev_name('origin/predeploy_staging')
   end
 
   def test_will_not_push_with_push_false
@@ -100,7 +100,7 @@ class RebuildStagingTest < RepoTest
     write_list(branch_data)
     assert rebuild(push: false)
     assert_empty @git.current_branch_list
-    refute @git.query_rev_name('origin/predeploy_staging', is_remote: false)
+    refute @git.query_rev_name('origin/predeploy_staging')
   end
 
   def test_will_add_branch_to_staging
