@@ -132,14 +132,6 @@ class MergeHelpers
     @git.checkout MERGE_TEST_BRANCH
   end
 
-  def test_merge branches, target, commit_id
-    branches = Array(branches)
-    reset_test_branch(commit_id || "#{@git.remote}/#{target}")
-    word = branches.size > 1 ? 'branches' : 'branch'
-    names = branches.map {|branch| "'#{branch}'"}
-    @git.merge(branches.map(&:commit_id), message: "Merge #{word} #{names.join(',')}")
-  end
-
   def test_merges(branches, target, commit_id)
     message = branches.is_a?(Array) ? 'testing merge' : nil
     merge_to = commit_id || "#{@git.remote}/#{target}"
