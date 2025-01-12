@@ -133,7 +133,7 @@ class ResolveMerge < MergeHelpers
 
   def resolve_merge branch, commit_id, broken_branches
     @logger.info "Testing merge to #{branch}" + (commit_id ? " (#{commit_id})" : "")
-    success, output = test_merges(broken_branches, branch, commit_id)
+    success, _output = test_merges(broken_branches, branch, commit_id)
     return if success && !broken_branches.any?(&:resolution?)
 
     if success
@@ -142,16 +142,14 @@ class ResolveMerge < MergeHelpers
       @logger.error "Merge with #{branch} failed!"
     end
 
+    reset_test_branch(commit_id)
     fix_branch = figure_fix_branch(branch, broken_branches)
     if !success
       fix_response = try_fix(fix_branch, broken_branches, branch, commit_id)
       if fix_response.is_a?(Branch)
         return fix_response
-      elsif :fix_failed == fix_response || broken_branches.size>0
-        stepped_resolve_merge(branch, commit_id, broken_branches)
       else
-        $stdout.puts output
-        request_user_fix
+        stepped_resolve_merge(branch, commit_id, broken_branches)
       end
     end
 
@@ -186,7 +184,7 @@ class ResolveMerge < MergeHelpers
     fix_branch = "#{@git.remote}/#{fix_branch}"
     if @git.query_rev_name(fix_branch)
       fix_branch = Branch.new(fix_branch, @git.query_rev(fix_branch), current_commiter)
-      success, _output = test_merge([fix_branch, *broken_branches], branch, commit_id)
+      success, _output = test_merges([fix_branch, *broken_branches], branch, commit_id)
       if success
         @logger.info "#{fix_branch} found"
         $stdout.print USAGE_QUERY
