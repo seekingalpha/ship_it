@@ -90,7 +90,8 @@ class RepoTest < ShipItTest
 
   def make_resolution_branch(branches, over_branch)
     resolver = ResolveMerge.new(logger: Logger.new(@log), git: @git, quiet: false)
-    success, = resolver.test_merge(branches, over_branch, nil)
+    resolver.reset_test_branch(over_branch)
+    success, = @git.merge(branches.map(&:commit_id), message: 'Merge branches')
     @git.commit('fix') if !success
     fix_branch_name = resolver.figure_fix_branch(over_branch, branches)
     @git.drop_branch(fix_branch_name) # to not deal with the possibility
