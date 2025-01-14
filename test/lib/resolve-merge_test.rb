@@ -87,7 +87,7 @@ class ResolveMergeTest < RepoTest
     @git.stub(:merge, method_mock) do
       resolve_merge_without_user_request(first_branch)
     end
-    assert_empty expected_checks, lambda { "Not all expections for merge fulfilled: #{expected_checks.inspect}"}
+    assert_empty expected_checks, lambda { "Not all expectations for merge fulfilled: #{expected_checks.inspect}"}
   end
 
   def test_skips_conflicting_branches_in_rebuild
