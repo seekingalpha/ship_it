@@ -75,11 +75,11 @@ class ResolveMergeTest < RepoTest
     branch_debug = (@branches.values + [rewrite]).map(&:log).map(&:inspect)
     method_mock = ->(commit_id, message: nil){
       if expected_checks.empty?
-        raise MiniTest::Assertion, "Unexpected call to merge(#{commit_id}, #{message})\n#{@log.string}"
+        raise Minitest::Assertion, "Unexpected call to merge(#{commit_id}, #{message})\n#{@log.string}"
       end
       exp = expected_checks.shift
       if [exp.commit_id] != Array(commit_id)
-        raise MiniTest::Assertion, %|Bad call to merge! Expected #{exp.name} (#{exp.commit_id}), received #{commit_id.inspect}, #{message}\n#{branch_debug.join("\n")}\n#{caller[0,5].join("\n")}\n#{@log.string}|
+        raise Minitest::Assertion, %|Bad call to merge! Expected #{exp.name} (#{exp.commit_id}), received #{commit_id.inspect}, #{message}\n#{branch_debug.join("\n")}\n#{caller[0,5].join("\n")}\n#{@log.string}|
       end
       @git.__minitest_stub__merge(commit_id, message: message)
     }
@@ -87,7 +87,7 @@ class ResolveMergeTest < RepoTest
     @git.stub(:merge, method_mock) do
       resolve_merge_without_user_request(first_branch)
     end
-    assert_empty expected_checks, lambda { "Not all expections for merge fulfilled: #{expected_checks.inspect}"}
+    assert_empty expected_checks, lambda { "Not all expectations for merge fulfilled: #{expected_checks.inspect}"}
   end
 
   def test_skips_conflicting_branches_in_rebuild

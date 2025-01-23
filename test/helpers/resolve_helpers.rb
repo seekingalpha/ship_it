@@ -23,7 +23,7 @@ module ResolveHelpers
     end
   rescue StandardError => e # add real error location
     if e.message.include?('CancelError')
-      raise MiniTest::Assertion, "Called from #{caller[1+indirection_offset]}\n#{e}\n#{@log.string}", e.backtrace
+      raise Minitest::Assertion, "Called from #{caller[1+indirection_offset]}\n#{e}\n#{@log.string}", e.backtrace
     elsif e.message.include?('GitActions::Exception')
       raise e.class, e.message, e.backtrace.delete_if {|l| l.include?('/gems/')}
     else
