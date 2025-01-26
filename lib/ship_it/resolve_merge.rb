@@ -137,6 +137,7 @@ class ResolveMerge < MergeHelpers
     return if success && !broken_branches.any?(&:resolution?)
 
     if success
+      reset_test_branch(output)
       @logger.info "Coalescing conflict resolutions!"
     else
       @logger.error "Merge with #{branch} failed!"
@@ -147,11 +148,8 @@ class ResolveMerge < MergeHelpers
       fix_response = try_fix(fix_branch, broken_branches, branch, commit_id)
       if fix_response.is_a?(Branch)
         return fix_response
-      elsif :fix_failed == fix_response || broken_branches.size>0
-        stepped_resolve_merge(branch, commit_id, broken_branches)
       else
-        $stdout.puts output
-        request_user_fix
+        stepped_resolve_merge(branch, commit_id, broken_branches)
       end
     end
 

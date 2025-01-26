@@ -132,12 +132,16 @@ class MergeHelpers
     @git.checkout MERGE_TEST_BRANCH
   end
 
-  def test_merge branches, target, commit_id
+  def test_merge(branches, target, commit_id)
     branches = Array(branches)
-    reset_test_branch(commit_id || "#{@git.remote}/#{target}")
-    word = branches.size > 1 ? 'branches' : 'branch'
-    names = branches.map {|branch| "'#{branch}'"}
-    @git.merge(branches.map(&:commit_id), message: "Merge #{word} #{names.join(',')}")
+    commit_id ||= "#{@git.remote}/#{target}"
+    branches.each do |branch|
+      success, output = @git.merge_tree(commit_id, branch.commit_id, message: "Merge branch #{branch}")
+      return [false, output] unless success
+
+      commit_id = output
+    end
+    [true, commit_id]
   end
 
   def rename_branch new_name, force: false
@@ -161,6 +165,7 @@ class MergeHelpers
     new_branches = []
     bad_branches = []
     skipped_resolutions = []
+    merge_to_commit_id = @git.query_rev('HEAD')
     branches.each do |branch|
       parts = missing_parts?(branch, branch_names)
       if parts.any?
@@ -170,17 +175,18 @@ class MergeHelpers
         next
       end
 
-      success, output = @git.merge(branch.commit_id, message: "Merge branch '#{branch}'")
+      success, output = @git.merge_tree(merge_to_commit_id, branch.commit_id, message: "Merge branch '#{branch}'")
       if success
+        merge_to_commit_id = output
         @logger.info "Merged #{branch} (#{branch.commit_id})"
         new_branches << branch.dup
       else
         @logger.info "Skipping #{branch} (#{branch.commit_id}) - doesn't merge cleanly"
-        @git.clear_merges
         bad_branches << branch.dup.tap {|skipped| skipped.reason = clean_reason(output)}
         branch_names -= [branch]
       end
     end
+    @git.reset_hard(merge_to_commit_id)
 
     [new_branches, bad_branches, skipped_resolutions]
   end
