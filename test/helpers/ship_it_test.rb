@@ -42,7 +42,7 @@ class RepoTest < ShipItTest
     temp_file('zero_file', 'initial commit') do |file|
       @git.write_commit('master', 'initial commit', {'zero_file' => file.path}, origin: nil)
     end
-    @git.reset_branch('origin/master', 'master', track: false)
+    @git.update_ref('refs/remotes/origin/master', 'master')
     @git.checkout('master')
   end
 
@@ -81,15 +81,17 @@ class RepoTest < ShipItTest
   end
 
   def merge(branch)
-    @git.checkout('origin/staging')
-    @git.merge(branch.name.start_with?('conflict-') ? "origin/#{branch}" : branch.name)
+    rhs = branch.name.start_with?('conflict-') ? "origin/#{branch}" : branch.name
+    _success, commit_id = @git.merge_tree('origin/staging', rhs)
+    @git.update_ref('refs/remotes/origin/staging', commit_id)
     message = [branch.commiter, '', "Master: #{@git.query_rev('origin/master')}"].join("\n")
     @git.history(message, @git.current_branch_list + [branch.log])
   end
 
   def make_resolution_branch(branches, over_branch)
     resolver = ResolveMerge.new(logger: Logger.new(@log), git: @git, quiet: false)
-    success, = resolver.test_merge(branches, over_branch, nil)
+    resolver.reset_test_branch(over_branch)
+    success, = @git.merge(branches.map(&:commit_id), message: 'Merge branches')
     @git.commit('fix') if !success
     fix_branch_name = resolver.figure_fix_branch(over_branch, branches)
     @git.drop_branch(fix_branch_name) # to not deal with the possibility

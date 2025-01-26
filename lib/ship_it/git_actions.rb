@@ -68,6 +68,20 @@ class GitActions
     reset_branch @history_branch, "#{@remote}/#{@history_branch}"
   end
 
+  def reset_hard(to_commit_id)
+    git(['reset', '--hard', to_commit_id])
+  end
+
+  def merge_tree(lhs, rhs, message: nil)
+    status, output = git(['merge-tree', lhs, rhs], forward_failure: true)
+    return [false, output] unless status.success?
+
+    tree_id = output
+    message ||= "Merge #{rhs}"
+    status, output = git(['commit-tree', tree_id, '-m', message, '-p', lhs, '-p', rhs], forward_failure: true)
+    [status.success?, output]
+  end
+
   def merge(branches, message: nil)
     status, output = git(['merge', ("-m#{message}" if message), '--no-ff', *branches].compact, forward_failure: true)
     raise output if status.exitstatus == 128 # untracked files messing up the merge
@@ -122,6 +136,10 @@ class GitActions
     git(['branch', '-f', track, branch, source].compact)
   end
 
+  def update_ref(ref, new_oid, old_oid=nil)
+    git(['update-ref', ref, new_oid, old_oid].compact)
+  end
+
   def checkout branch
     git(%W"checkout -q #{branch}")
   end
@@ -147,7 +165,8 @@ class GitActions
     "#{ref}/*"
   end
 
-  def query_rev_name(revision, is_remote: revision.start_with?("#{@remote}/"))
+  def query_rev_name(revision)
+    is_remote = revision.start_with?("#{@remote}/")
     _status, newrev = git(%W"name-rev --name-only --refs #{search_ref(is_remote)} --no-undefined #{revision}", forward_failure: true)
 
     if newrev.empty? || newrev.include?('cannot describe') || newrev.start_with?('Could not get sha1')

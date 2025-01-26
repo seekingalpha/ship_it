@@ -73,18 +73,18 @@ class ResolveMergeTest < RepoTest
     expected_checks.shift # rebuilding first, merging later
     expected_checks << rewrite
     branch_debug = (@branches.values + [rewrite]).map(&:log).map(&:inspect)
-    method_mock = ->(commit_id, message: nil){
+    method_mock = ->(lhs, commit_id, message: nil){
       if expected_checks.empty?
-        raise Minitest::Assertion, "Unexpected call to merge(#{commit_id}, #{message})\n#{@log.string}"
+        raise Minitest::Assertion, "Unexpected call to merge_tree(#{commit_id}, #{message})\n#{@log.string}"
       end
       exp = expected_checks.shift
       if [exp.commit_id] != Array(commit_id)
         raise Minitest::Assertion, %|Bad call to merge! Expected #{exp.name} (#{exp.commit_id}), received #{commit_id.inspect}, #{message}\n#{branch_debug.join("\n")}\n#{caller[0,5].join("\n")}\n#{@log.string}|
       end
-      @git.__minitest_stub__merge(commit_id, message: message)
+      @git.__minitest_stub__merge_tree(lhs, commit_id, message: message)
     }
     flush_log
-    @git.stub(:merge, method_mock) do
+    @git.stub(:merge_tree, method_mock) do
       resolve_merge_without_user_request(first_branch)
     end
     assert_empty expected_checks, lambda { "Not all expectations for merge fulfilled: #{expected_checks.inspect}"}
