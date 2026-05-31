@@ -82,12 +82,6 @@ class RebuildStaging < MergeHelpers
       @git.branch_in?(branch.commit_id, "#{@git.remote}/master")
     end
     @logger.debug "In master: #{@branches_in_master.map(&:name)}"
-    gone_branches = @branches.select do |branch|
-      @logger.info "Checking #{branch.name}"
-      !@git.query_rev_name("#{@git.remote}/#{branch.name}")
-    end
-    @branches -= gone_branches
-    @logger.info "Disappeared: #{gone_branches.map(&:name)}"
     @failed_report = {}
   end
 

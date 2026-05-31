@@ -245,6 +245,21 @@ class ResolveMergeTest < RepoTest
     assert_equal new_branch.log, new_branch_list[1], new_branch_list.inspect + "\n" + @log.string
   end
 
+  def test_gone_branches
+    build_staging 2
+    deleted_branch = @branches.values.first
+    new_branch = add_branch(fname: default_branch_file(deleted_branch))
+    @git.drop_remote deleted_branch.name
+
+    flush_log
+    resolve_merge_without_user_request(new_branch.name)
+
+    new_branch_list = BranchList.read('new_branches.list')
+    assert_equal [new_branch.log], new_branch_list, new_branch_list.inspect + "\n" + @log.string
+    refute_includes new_branch_list.map(&:first), deleted_branch.name, @log.string
+    assert_includes @log.string, "Disappeared: [\"#{deleted_branch.name}\"]", @log.string
+  end
+
   def replace_branch(branch, branch_with_new_data)
     branch2_name = branch_with_new_data.name
     if !@git.query_rev_name(branch2_name)
