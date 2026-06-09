@@ -165,6 +165,10 @@ class GitActions
     "#{ref}/*"
   end
 
+  def remote_branches_list
+    git(['branch', '--list', '--format=%(refname:short)', "--remote"]).split("\n")
+  end
+
   def query_rev_name(revision)
     is_remote = revision.start_with?("#{@remote}/")
     _status, newrev = git(%W"name-rev --name-only --refs #{search_ref(is_remote)} --no-undefined #{revision}", forward_failure: true)

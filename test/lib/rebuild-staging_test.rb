@@ -352,6 +352,7 @@ class RebuildStagingTest < RepoTest
     assert rebuild(delayed_conflict_drop: true), -> { @log.string }
     refute File.exist?('failed_report.json')
     assert_equal [new_branch.name], @git.current_branch_list.map(&:first), @log.string
+    assert_includes @log.string, "Disappeared: [\"#{branch_data[1].name}\"]", @log.string
   end
 
   def test_leaves_unrelated_conflicts_alone

@@ -247,5 +247,12 @@ class MergeHelpers
 
   def load_branches
     @branches = @git.current_branch_list.map {|branch_data| Branch.new(*branch_data)}
+    remote_branches_list = @git.remote_branches_list
+    gone_branches = @branches.select do |branch|
+      @logger.info "Checking #{branch.name}"
+      !remote_branches_list.include?("#{@git.remote}/#{branch.name}")
+    end
+    @branches -= gone_branches
+    @logger.info "Disappeared: #{gone_branches.map(&:name)}"
   end
 end
