@@ -7,6 +7,7 @@ class MergeHelpers
 
   CONFLICT_NAME = 'conflict-'.freeze
   CONFLICT_START = CONFLICT_NAME.size
+  CONFLICT_JOINER = '+'.freeze
 
   attr_reader :branches
 
@@ -33,7 +34,7 @@ class MergeHelpers
 
     def conflict_branches
       if resolution?
-        name[CONFLICT_START..-1].to_s.split('+')
+        name[CONFLICT_START..-1].to_s.split(CONFLICT_JOINER)
       else
         []
       end
