@@ -35,7 +35,7 @@ class MultipleBranchAndFileConflictTest < RepoTest
     # conflict #1
     branch2 = add_branch(fname: 'test_file')
     merge_and_rebuild(branch2, true)
-    conflict_branch = @git.current_branch_list.map(&:first).find { |branch| branch.start_with?(MergeHelpers::CONFLICT_NAME) }
+    conflict_branch = @git.current_branch_list.map(&:first).find { |branch| branch.start_with?(MergeHelpers::CONFLICT_PREFIX) }
     @git.drop_branch(conflict_branch) # this conflict is expected to NOT exist on the local machine
 
     # conflict #2
