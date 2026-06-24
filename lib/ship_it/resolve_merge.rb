@@ -97,7 +97,7 @@ class ResolveMerge < MergeHelpers
 
       broken_branches.each do |broken_branch|
         names = [branch, broken_branch].map(&:name)
-        resolve_name = CONFLICT_PREFIX + names.sort.join(CONFLICT_JOINER) + CONFLICT_SUFFIX
+        resolve_name = conflict_resolution_branch_name_for(names)
         unless resolves.any? {|rbranch| rbranch.name == resolve_name}
           fix = resolve_merge(branch.name, branch.commit_id, [broken_branch])
           if fix
@@ -125,10 +125,13 @@ class ResolveMerge < MergeHelpers
     resolves
   end
 
+  # @param branch [String]
+  # @param broken_branches [Array<Branch>]
+  # @returns [String]
   def figure_fix_branch branch, broken_branches
     branches = [branch] + broken_branches.map(&:conflict_or_normal_branches).flatten(1)
     branches -= ['master'] # master is just the base
-    "#{CONFLICT_PREFIX}#{branches.uniq.sort.join(CONFLICT_JOINER)}#{CONFLICT_SUFFIX}"
+    conflict_resolution_branch_name_for(branches)
   end
 
   def resolve_merge branch, commit_id, broken_branches

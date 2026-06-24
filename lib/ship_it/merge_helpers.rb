@@ -32,12 +32,10 @@ class MergeHelpers
       name.start_with?(CONFLICT_PREFIX)
     end
 
+    # @returns Array<String>
     def conflict_branches
       if resolution?
-        name
-          .delete_prefix(CONFLICT_PREFIX)
-          .delete_suffix(CONFLICT_SUFFIX)
-          .split(CONFLICT_JOINER)
+        conflicted_branch_names_resolved_by(name)
       else
         []
       end
@@ -92,6 +90,21 @@ class MergeHelpers
       "#{severity}: #{msg}\n"
     end
     @logger
+  end
+
+  def conflict_resolution_branch_name_for(conflicted_branch_names)
+    [
+      CONFLICT_PREFIX,
+      conflicted_branches.uniq.sort.join(CONFLICT_JOINER),
+      CONFLICT_SUFFIX,
+    ].join
+  end
+
+  def conflicted_branch_names_resolved_by(conflict_resolution_branch_name)
+    conflict_resolution_branch_name
+      .delete_prefix(CONFLICT_PREFIX)
+      .delete_suffix(CONFLICT_SUFFIX)
+      .split(CONFLICT_JOINER)
   end
 
   def process
