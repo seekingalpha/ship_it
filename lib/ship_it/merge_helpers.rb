@@ -7,7 +7,7 @@ class MergeHelpers
 
   CONFLICT_PREFIX = 'conflict/'.freeze
   CONFLICT_SUFFIX = '/resolved'.freeze
-  CONFLICT_JOINER = '+'.freeze
+  CONFLICT_JOINER = '/'.freeze
 
   attr_reader :branches
 
