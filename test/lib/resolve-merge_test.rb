@@ -132,7 +132,7 @@ class ResolveMergeTest < RepoTest
 
     # expected: a+b+c, a+c, b+c, c
     expected_branches = [[*@branches.keys, new_branch], [@branches.keys[0], new_branch], [@branches.keys[1], new_branch]].map do |blist|
-      MergeHelpers::CONFLICT_PREFIX + blist.join(MergeHelpers::CONFLICT_JOINER)
+      MergeHelpers::CONFLICT_PREFIX + blist.join(MergeHelpers::CONFLICT_JOINER) + MergeHelpers::CONFLICT_SUFFIX
     end + [new_branch.name]
     new_branch_list = BranchList.read('new_branches.list')
     assert_equal 4, new_branch_list.size, new_branch_list.inspect + "\n" + @log.string
@@ -178,7 +178,7 @@ class ResolveMergeTest < RepoTest
     assert_empty removed_branch_list
 
     expected_branches = [[first_branch, complex_branch, last_branch], [complex_branch, last_branch]].map do |blist|
-      MergeHelpers::CONFLICT_PREFIX + blist.join(MergeHelpers::CONFLICT_JOINER)
+      MergeHelpers::CONFLICT_PREFIX + blist.join(MergeHelpers::CONFLICT_JOINER) + MergeHelpers::CONFLICT_SUFFIX
     end + [last_branch.name]
     new_branch_list = BranchList.read('new_branches.list')
     assert_equal 3, new_branch_list.size, new_branch_list.inspect + "\n" + @log.string

@@ -5,8 +5,8 @@ class MergeHelpers
   MERGE_TEST_BRANCH = 'predeploy_merge_test'.freeze # should never be pushed
   DEFAULTS = {quiet: true, target: 'staging', remote: 'origin'}
 
-  CONFLICT_PREFIX = 'conflict-'.freeze
-  CONFLICT_START = CONFLICT_PREFIX.size
+  CONFLICT_PREFIX = 'conflict/'.freeze
+  CONFLICT_SUFFIX = '/resolved'.freeze
   CONFLICT_JOINER = '+'.freeze
 
   attr_reader :branches
@@ -34,7 +34,10 @@ class MergeHelpers
 
     def conflict_branches
       if resolution?
-        name[CONFLICT_START..-1].to_s.split(CONFLICT_JOINER)
+        name
+          .delete_prefix(CONFLICT_PREFIX)
+          .delete_suffix(CONFLICT_SUFFIX)
+          .split(CONFLICT_JOINER)
       else
         []
       end
