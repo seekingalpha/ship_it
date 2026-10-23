@@ -77,7 +77,7 @@ class MergeHelpers
     @git = options[:git] || GitActions.new(options[:target], options[:remote], options[:push_remote])
     @git.set_logger(@logger)
     unless current_commiter.to_s.include?('@')
-      raise "Commiter email not set in git!"
+      raise "Committer email not set in git!"
     end
   end
 
